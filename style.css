@@ -1,0 +1,957 @@
+/* ==========================================================================
+   style.css - Folha de Estilos Principal
+   ==========================================================================
+ * Organização do arquivo:
+ * 1. Variáveis Globais (:root)
+ * 2. Reset e Estilos Globais (body, box-sizing)
+ * 3. Classes Utilitárias (ex: .sr-only)
+ * 4. Cabeçalho (Header) e Animação
+ * 5. Seção Principal (Main) e Formulário de Input
+ * 6. Seção de Controle (Filtro e Contador)
+ * 7. Container Kanban (Listas de Tarefas)
+ * 8. Itens de Tarefa (<li>)
+ * 9. Painel de Detalhes (Edição)
+ * 10. Rodapé (Footer) e Lista de Concluídas
+ * 11. Animações (Keyframes)
+ * 12. Responsividade (Media Queries)
+ ========================================================================== */
+
+
+/* --- BLOCO 1: Variáveis CSS (Paleta de Cores e Sombras) --- */
+/* Usar ':root' nos permite criar "variáveis" (atalhos) para cores, fontes, etc.
+  Se quisermos mudar uma cor em todo o site, só precisamos mudar aqui.
+*/
+:root {
+    --fundo-principal: #FCFAF5; /* Branco Quente */
+    --fundo-secundario: #F5EFE9; /* Bege Mais Claro para contraste */
+    --cor-destaque-principal: #A66B5F; /* Terracota Profundo (Header/Botão) */
+    --cor-destaque-secundaria: #4A352F; /* Marrom Chocolate (Texto) */
+    --cor-accent: #C79A7E; /* Cobre Suave (Destaques) */
+    --borda-suave: #D6C7BC; /* Taupe Claro (Bordas) */
+
+    /* Cores usadas para identificar a prioridade das tarefas */
+    --prioridade-baixa: #8FBC8F; 
+    --prioridade-media: #ECAE4E;
+    --prioridade-alta: #CD5C5C; 
+
+    /* Sombra padrão usada em vários elementos */
+    --shadow-suave: 0 4px 10px rgba(0,0,0,0.03); 
+}
+
+/* --- BLOCO 2: Reset Global e Estilos do Body --- */
+
+/* Define o 'box-sizing' global. 'border-box' faz com que 'padding' (espaçamento interno)
+  e 'border' (borda) sejam incluídos na largura/altura total do elemento.
+  Isso facilita MUITO a criação de layouts.
+*/
+html {
+  box-sizing: border-box;
+}
+
+/*
+  Este seletor ('*') aplica a regra a TODOS os elementos, fazendo com que
+  eles "herdem" o 'box-sizing: border-box' definido no <html>.
+*/
+*, *:before, *:after {
+  box-sizing: inherit; 
+}
+
+/* Estiliza o <body> (o corpo principal da página):
+  - Define a fonte padrão (família de fontes).
+  - Define a cor de fundo e do texto.
+  - Remove margens e preenchimentos padrão do navegador.
+  - Usa 'display: flex' e 'flex-direction: column' para organizar a página
+    verticalmente (header, main, footer).
+  - 'min-height: 100vh' garante que a página ocupe pelo menos 100% da altura da tela,
+    o que ajuda a "grudar" o rodapé na parte inferior.
+*/
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: var(--fundo-principal); 
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    color: var(--cor-destaque-secundaria);
+}
+
+/* --- BLOCO 3: Classes Utilitárias --- */
+
+/* CLASSE DE ACESSIBILIDADE (A11y):
+  Esta classe esconde um elemento visualmente (para quem vê a tela),
+  mas o mantém 100% acessível para leitores de tela (usados por pessoas
+  com deficiência visual). Usamos isso nas <label> dos formulários.
+*/
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+
+/* --- BLOCO 4: Estilos do Cabeçalho (Header) --- */
+
+/* Estiliza o <header> (o topo da página):
+  - Define um fundo em gradiente linear (vai de uma cor a outra).
+  - Define a cor do texto, o espaçamento interno (padding) e a sombra.
+  - Usa 'display: flex' para centralizar o conteúdo animado.
+*/
+header {
+    background: linear-gradient(to right, var(--cor-destaque-principal), #8C5950); 
+    color: white;
+    padding: 40px; 
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* --- BLOCO 4.1: Animação do Cabeçalho --- */
+/* (Esta parte é mais complexa, focada apenas na animação visual) */
+
+/* Container principal da animação ('To-Do List' + Checkbox) */
+.header-animated {
+    display: flex;
+    align-items: center;
+    font-size: 2.5em;
+    font-weight: 300; 
+    letter-spacing: 0.15em;
+    color: white;
+    position: relative;
+    animation: fullAnimation 8s infinite forwards; 
+}
+/* A "caixa" do checkbox animado */
+.checkbox-container {
+    width: 1.2em;
+    height: 1.2em;
+    border: 3px solid white;
+    border-radius: 5px;
+    margin-right: 0.5em;
+    position: relative;
+    flex-shrink: 0; 
+}
+/* As duas linhas que formam o "X" (ou check) dentro da caixa */
+.checkbox-x-line {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0; /* Começa com largura 0 para animar */
+    height: 4px;
+    background-color: var(--cor-accent);
+    transform-origin: center center;
+    opacity: 0; /* Começa invisível */
+}
+/* Estilo para a primeira linha do X (diagonal) */
+.checkbox-x-line.line1 {
+    transform: translate(-50%, -50%) rotate(45deg); 
+    animation: markX1 8s infinite forwards; 
+}
+/* Estilo para a segunda linha do X (outra diagonal) */
+.checkbox-x-line.line2 {
+    transform: translate(-50%, -50%) rotate(-45deg); 
+    animation: markX2 8s infinite forwards; 
+}
+/* Container do texto "To-Do List" */
+.todo-text-container {
+    position: relative;
+    overflow: hidden; /* Esconde o texto que ainda não foi "digitado" */
+    white-space: nowrap; /* Impede que o texto quebre a linha */
+    border-right: 3px solid transparent; /* Simula o cursor de digitação */
+    line-height: 1.2; 
+}
+/* O texto "To-Do List" (fica escondido, serve de base) */
+.todo-text {
+    visibility: hidden; 
+    line-height: 1.2; 
+}
+/* O texto que "aparece" por cima, simulando a digitação */
+.todo-text-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    width: 0; /* Começa com largura 0 e a animação 'typing' aumenta */
+    animation:
+        typing 8s steps(12, end) infinite forwards,
+        blink-caret 0.75s step-end infinite;
+}
+/* A linha que "risca" o texto (strikethrough) */
+.strikethrough-line {
+    position: absolute;
+    top: 52%; 
+    left: 0;
+    width: 0; /* Começa com largura 0 */
+    height: 4px; 
+    background-color: var(--cor-accent); 
+    transform: translateY(-50%);
+    border-radius: 2px;
+    animation: strikeText 8s infinite forwards;
+    z-index: 1; 
+}
+/* (As animações @keyframes estão no BLOCO 11, no final do arquivo) */
+/* --- FIM DA ANIMAÇÃO DO CABEÇALHO --- */
+
+
+/* --- BLOCO 5: Seção Principal (Main) e Formulário de Input --- */
+
+/* Estiliza o <main> (conteúdo principal):
+  - 'flex: 1' faz com que ele "cresça" e ocupe todo o espaço disponível
+    entre o <header> e o <footer>.
+  - 'padding' dá o espaçamento interno (40px em cima/baixo, 20px nas laterais).
+  - 'align-items: center' centraliza todo o conteúdo (inputs, kanban) no meio da página.
+*/
+main {
+    flex: 1;
+    padding: 40px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Estiliza a seção do formulário (<form>):
+  - 'display: flex' e 'flex-wrap: wrap' permite que os inputs fiquem lado a lado
+    e quebrem para a linha de baixo se não houver espaço.
+  - 'gap' define o espaço ENTRE os inputs.
+  - 'max-width' limita a largura máxima do formulário.
+*/
+.input-section {
+    display: flex;
+    flex-wrap: wrap; 
+    gap: 15px; 
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    max-width: 1100px; 
+    padding-bottom: 30px;
+    border-bottom: 2px solid var(--borda-suave); 
+}
+
+/* Estilização COMUM a todos os campos de entrada (<input> e <select>)
+  do formulário principal.
+*/
+#titulo-tarefa,
+#descricao-tarefa,
+#data-tarefa,
+#horario-tarefa,
+#prioridade-tarefa {
+    padding: 12px 18px;
+    border: 1px solid var(--borda-suave);
+    border-radius: 8px; 
+    font-size: 16px;
+    transition: all 0.3s; /* Animação suave para foco */
+    height: 50px; 
+    background-color: white;
+    color: var(--cor-destaque-secundaria);
+    /* 'flex-grow: 1' permite que o input cresça para preencher espaço */
+    flex-grow: 1;
+    /* 'flex-shrink: 1' permite que o input encolha se necessário */
+    flex-shrink: 1;
+}
+
+/* Define as larguras 'base' (mínimas) para os inputs fluidos.
+  'flex-basis' é a largura inicial antes que o 'flex-grow' ou 'flex-shrink' ajam.
+*/
+#titulo-tarefa { flex-basis: 220px; }
+#descricao-tarefa { flex-basis: 220px; }
+#data-tarefa { flex-basis: 160px; }
+#horario-tarefa { flex-basis: 120px; } 
+#prioridade-tarefa { flex-basis: 180px; }
+
+/* Define a cor do texto do input de data e hora.
+*/
+#data-tarefa,
+#horario-tarefa {
+    color: var(--cor-destaque-secundaria); 
+}
+/* Um "truque" para mostrar um 'placeholder' (ex: "Data") em campos
+  do tipo 'date' e 'time' antes que um valor seja selecionado.
+*/
+#data-tarefa:before,
+#horario-tarefa:before {
+    content: attr(placeholder);
+    color: var(--cor-destaque-principal); 
+}
+/* Esconde o placeholder "falso" quando o campo é focado ou tem um valor */
+#data-tarefa:focus:before,
+#data-tarefa:valid:before,
+#horario-tarefa:focus:before,
+#horario-tarefa:valid:before {
+    content: "";
+}
+
+/* Estilo de 'foco' (quando o usuário clica ou usa Tab):
+  Define uma borda e sombra coloridas para destacar o campo ativo.
+*/
+input:focus,
+select:focus {
+    outline: none; /* Remove a borda azul padrão do navegador */
+    border-color: var(--cor-accent); 
+    box-shadow: 0 0 10px rgba(199, 154, 126, 0.4);
+}
+
+/* Estilo GERAL para todos os botões (<button>) da página.
+  Define a cor de fundo, cor do texto, cursor, etc.
+*/
+button {
+    border: none;
+    background: var(--cor-destaque-principal);
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-weight: 500;
+}
+/* Estilo específico para o botão de 'Adicionar' (+) na seção de inputs.
+  Define seu tamanho (50x50) e bordas arredondadas.
+*/
+.input-section button {
+    padding: 10px;
+    border-radius: 8px; 
+    width: 50px;
+    height: 50px;
+    font-size: 22px;
+    line-height: 1;
+}
+/* Efeito 'hover' (quando o mouse passa por cima) para o botão de Adicionar.
+  Muda a cor de fundo e levanta o botão levemente (transform).
+*/
+.input-section button:hover {
+    background: #8C5950; 
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-suave);
+}
+
+/* --- BLOCO 6: Seção de Controle (Filtro e Contador) --- */
+
+/* Estiliza o container que segura o filtro e o contador de tarefas.
+  Também usa flex-wrap para quebrar a linha em telas menores.
+*/
+.controle-section {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    max-width: 1100px;
+    margin-top: 30px;
+}
+/* Container que agrupa o <select> do filtro e o botão de limpar (ícone de borracha) */
+.filtro-section {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+/* Estiliza o <select> (menu drop-down) do filtro de prioridade */
+#filtro-prioridade {
+    padding: 12px 18px;
+    border: 1px solid var(--borda-suave);
+    border-radius: 8px;
+    font-size: 16px;
+    width: 210px;
+    background-color: white;
+    color: var(--cor-destaque-secundaria);
+}
+/* Estiliza o botão de "Limpar Filtro" (borracha) */
+.filtro-section button {
+    padding: 12px;
+    font-size: 18px; 
+    background: var(--borda-suave); 
+    color: var(--cor-destaque-secundaria);
+    border-radius: 8px; 
+    width: 50px;
+    height: 50px;
+}
+/* Efeito 'hover' para o botão de limpar filtro */
+.filtro-section button:hover {
+    background: #BFAEA3; 
+    transform: translateY(-1px);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+/* Estiliza o <p> (parágrafo) que mostra o contador de tarefas.
+  Dá a ele uma aparência de "crachá" ou "tag".
+*/
+#contador-tarefas {
+    text-align: center;
+    font-size: 1.2em; 
+    font-weight: 600;
+    color: var(--cor-destaque-principal); 
+    padding: 10px 25px; 
+    background-color: var(--fundo-secundario); 
+    border-radius: 8px;
+    box-shadow: var(--shadow-suave); 
+    border: 1px solid var(--borda-suave);
+}
+
+/* --- BLOCO 7: Container Kanban (Listas de Tarefas) --- */
+
+/* O container principal das colunas (Atrasadas, Hoje, Amanhã, Futuras).
+  - Usa 'display: grid', que é perfeito para layout em colunas.
+  - 'grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));' é a
+    parte "mágica":
+    - 'auto-fit': Cria quantas colunas couberem na tela.
+    - 'minmax(300px, 1fr)': Cada coluna terá NO MÍNIMO 300px, mas pode
+      crescer ('1fr') para dividir o espaço igualmente.
+    - Isso torna o grid 100% responsivo sem precisar de Media Queries.
+*/
+.kanban-container {
+    width: 100%;
+    max-width: 1400px;
+    margin-top: 30px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 25px; /* Espaço entre as colunas */
+}
+
+/* Estiliza cada coluna individual (o "card" branco).
+*/
+.coluna-tarefa {
+    background-color: white;
+    padding: 20px;
+    border-radius: 12px; 
+    box-shadow: var(--shadow-suave);
+    min-height: 250px; /* Altura mínima para colunas vazias */
+    border: 1px solid var(--borda-suave); 
+    transition: all 0.4s ease-in-out; /* Animação suave para hover */
+}
+/* Efeito 'hover' para a coluna inteira */
+.coluna-tarefa:hover {
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08); 
+    border-color: var(--cor-destaque-principal); 
+    transform: translateY(-5px); /* Levanta a coluna */
+}
+/* Estiliza os títulos (H2) de cada coluna (ex: "🔴 Atrasadas") */
+.coluna-tarefa h2 {
+    text-align: center;
+    font-size: 1.3em;
+    color: var(--cor-destaque-principal);
+    margin-top: 0;
+    padding-bottom: 15px;
+    border-bottom: 2px solid var(--cor-accent); 
+    font-weight: 600;
+    letter-spacing: 0.05em;
+}
+
+/* --- BLOCO 8: Itens de Tarefa (<li>) --- */
+
+/* Estilo GERAL para listas <ul>.
+  Remove o estilo padrão (bolinhas) e o preenchimento.
+*/
+ul {
+    list-style: none;
+    padding: 0;
+    margin-top: 15px;
+}
+
+/* Estilo principal para CADA item (<li>) da tarefa.
+  - Define o fundo, espaçamento, sombra.
+  - 'display: flex' é usado para alinhar o checkbox, conteúdo e botões.
+  - 'border-left' é transparente por padrão, mas será colorido pela prioridade.
+  - 'animation: fadein' aplica a animação de surgimento.
+*/
+li {
+    background-color: var(--fundo-secundario); 
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    display: flex;
+    align-items: flex-start; /* Alinha no topo (bom para descrições longas) */
+    justify-content: space-between; /* Joga os botões para a direita */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    transition: all 0.3s;
+    cursor: default;
+    width: 100%; 
+    border-left: 5px solid transparent;
+    animation: fadein 0.5s ease-out;
+}
+
+/* Efeito 'hover' para o item da tarefa (<li>) */
+li:hover {
+    background-color: #EEE7E2;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+/* Container <div> que agrupa o título, descrição e data.
+  - 'flex-direction: column' empilha os textos verticalmente.
+  - 'flex: 1' faz este container crescer e ocupar o espaço
+    entre o checkbox e os botões.
+*/
+li div.conteudo-tarefa {
+    display: flex;
+    flex-direction: column;
+    margin-left: 10px;
+    flex: 1;
+}
+/* Estiliza o TÍTULO (<strong>) da tarefa */
+li div strong {
+    font-size: 1.1em;
+    margin-bottom: 5px;
+    color: var(--cor-destaque-secundaria);
+    font-weight: 600;
+}
+/* Estiliza a DESCRIÇÃO (<span>) da tarefa */
+li div span.descricao {
+    font-size: 0.95em;
+    color: #8C5950; 
+    margin-bottom: 5px;
+}
+/* Estiliza o texto da DATA (<span>) da tarefa */
+li div span.data-tarefa {
+    font-size: 0.85em;
+    color: var(--cor-destaque-principal);
+    margin-top: 5px;
+    font-weight: 500;
+}
+
+/* Container <div> que agrupa os botões de 'detalhes' e 'remover' */
+.botoes-acao {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+/* Estilos COMUNS aos botões de ação (remover e detalhes) */
+button.remover,
+button.detalhes {
+    font-size: 15px;
+    padding: 8px 15px;
+    border-radius: 6px; 
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s;
+    width: auto;
+    height: auto;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+/* Cor específica do botão 'remover' (vermelho) */
+button.remover {
+    background: var(--prioridade-alta); 
+    color: white;
+}
+/* Efeito 'hover' do botão 'remover' */
+button.remover:hover {
+    background: #B45555;
+}
+/* Cor específica do botão 'detalhes' (cobre) */
+button.detalhes {
+    background: var(--cor-accent); 
+    color: white;
+}
+/* Efeito 'hover' do botão 'detalhes' */
+button.detalhes:hover {
+    background: #A68169;
+}
+/* Classe aplicada à tarefa (<li>) quando o checkbox é marcado.
+  - 'text-decoration: line-through' adiciona o "riscado" no texto.
+  - 'opacity: 0.8' deixa a tarefa levemente transparente.
+*/
+.tarefa-concluida {
+    text-decoration: line-through;
+    color: var(--borda-suave);
+    opacity: 0.8;
+    transition: all 0.4s;
+}
+
+/* Regras que aplicam a cor na borda esquerda do <li>
+  baseado na classe de prioridade.
+*/
+li.baixa { border-left-color: var(--prioridade-baixa); } 
+li.media { border-left-color: var(--prioridade-media); } 
+li.alta { border-left-color: var(--prioridade-alta); } 
+
+/* --- BLOCO 9: Estilos do Painel de Detalhes --- */
+
+/* Classe que esconde o painel (quando não está em uso) */
+.painel-oculto {
+    display: none;
+}
+/* Classe que MOSTRA o painel.
+  - 'position: fixed' o mantém fixo na tela, mesmo ao rolar a página.
+  - 'top: 0; right: 0;' o posiciona no canto superior direito.
+  - 'z-index: 1000' garante que ele fique "por cima" de todo o resto.
+*/
+.painel-visivel {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 400px;
+    height: 100%;
+    background-color: var(--fundo-principal); 
+    box-shadow: -6px 0 15px rgba(0,0,0,0.1);
+    z-index: 1000;
+    transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    transform: translateX(0); /* (Poderia ser usado para animar a entrada) */
+}
+/* Container do conteúdo dentro do painel (para padding e scroll) */
+.painel-conteudo {
+    padding: 30px;
+    position: relative;
+    height: 100%;
+    overflow-y: auto; /* Adiciona barra de rolagem se o conteúdo for muito grande */
+}
+/* Estiliza o botão "X" para fechar o painel */
+.fechar-painel {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: transparent;
+    border: none;
+    font-size: 1.8em;
+    color: var(--cor-destaque-secundaria);
+    opacity: 0.7;
+    transition: opacity 0.3s;
+}
+/* Efeito 'hover' do botão "X" */
+.fechar-painel:hover {
+    opacity: 1;
+}
+/* Estilo COMUM para os campos de input DENTRO do painel */
+.input-detalhes {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--borda-suave);
+    border-radius: 8px;
+    font-size: 1em;
+    margin-bottom: 12px;
+    transition: all 0.3s;
+    background-color: white;
+    color: var(--cor-destaque-secundaria);
+}
+/* Efeito 'focus' para os inputs do painel */
+.input-detalhes:focus {
+    border-color: var(--cor-destaque-principal);
+    box-shadow: 0 0 6px rgba(166, 107, 95, 0.3); 
+    outline: none;
+}
+/* Estilo específico para o input de TÍTULO do painel (maior) */
+#input-titulo-detalhes {
+    font-size: 1.6em;
+    font-weight: 500;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+/* Estilo específico para a DESCRIÇÃO (textarea) do painel */
+#input-descricao-detalhes {
+    height: 100px;
+    resize: vertical; /* Permite que o usuário redimensione a altura */
+    border-radius: 8px;
+}
+/* Container que agrupa os inputs de data e hora no painel */
+.detalhes-campos-data-hora {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+/* Faz os inputs de data e hora dividirem o espaço */
+.detalhes-campos-data-hora input {
+    flex: 1;
+    border-radius: 8px;
+}
+/* Container que agrupa o input e o botão de adicionar "Mini Tarefas" */
+.subtarefas-input {
+    display: flex;
+    gap: 10px;
+    margin-top: 25px;
+    align-items: center;
+}
+/* Estilo do input de adicionar "Mini Tarefa" */
+#input-subtarefa-detalhes {
+    flex-grow: 1;
+    padding: 10px 15px;
+    border: 1px solid var(--borda-suave);
+    border-radius: 20px; /* Borda arredondada (estilo "pílula") */
+}
+/* Efeito 'focus' do input de mini tarefa */
+#input-subtarefa-detalhes:focus {
+    border-color: var(--cor-destaque-principal);
+    box-shadow: 0 0 5px rgba(166, 107, 95, 0.2);
+}
+/* Estilo do botão "+" de adicionar mini tarefa (circular) */
+.subtarefas-input button {
+    padding: 10px;
+    border-radius: 50%;
+    background: var(--cor-accent);
+}
+/* Estilo da lista <ul> de mini tarefas */
+#lista-subtarefas-detalhes {
+    padding-left: 0;
+    margin-top: 15px;
+}
+/* Estilo de CADA item (<li>) da mini tarefa */
+#lista-subtarefas-detalhes li {
+    background-color: transparent;
+    border-bottom: 1px solid var(--borda-suave);
+    padding: 10px 0;
+    margin-bottom: 5px;
+    box-shadow: none;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    font-size: 1em;
+    color: var(--cor-destaque-secundaria);
+    transition: all 0.2s;
+    border-left: none; /* Remove a borda de prioridade */
+    animation: none; /* Remove a animação 'fadein' */
+}
+/* Efeito 'hover' da mini tarefa */
+#lista-subtarefas-detalhes li:hover {
+    background-color: rgba(166, 107, 95, 0.05); 
+    transform: none;
+}
+/* Classe para a mini tarefa concluída (riscada) */
+.subtarefa-concluída {
+    text-decoration: line-through;
+    color: var(--borda-suave);
+}
+
+/* --- BLOCO 10: Estilos do Rodapé (Footer) e Lista de Concluídas --- */
+
+/* Estiliza o <footer> (rodapé).
+  - Define a cor de fundo e a sombra (para dar a impressão de estar "acima" do conteúdo).
+  - Centraliza o conteúdo.
+*/
+#rodape-concluidas {
+    background-color: var(--fundo-secundario); 
+    text-align: center;
+    padding: 15px 20px;
+    font-size: 14px;
+    color: var(--cor-destaque-secundaria);
+    width: 100%;
+    display: flex;
+    flex-direction: column; 
+    align-items: center;
+    box-shadow: 0 -3px 8px rgba(0,0,0,0.08);
+}
+/* Estiliza a barra clicável (header do rodapé) que mostra/esconde
+  as tarefas concluídas.
+*/
+.toggle-concluidas {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    font-size: 1.15em;
+    font-weight: bold;
+    color: var(--cor-destaque-principal);
+    padding: 10px 0;
+}
+/* Efeito 'hover' da barra "toggle" */
+.toggle-concluidas:hover {
+    color: #8C5950;
+}
+/* Define a transição para o ícone de seta (para que ele gire suavemente) */
+#icone-toggle {
+    transition: transform 0.3s;
+}
+/* Classe que define a lista de concluídas como VISÍVEL.
+  - 'max-height: 600px' (um valor alto) permite que a lista "cresça"
+    de 0 até sua altura total.
+  - 'transition: max-height ...' cria a animação de "deslizar para baixo".
+  - 'grid' é usado para organizar os itens concluídos em colunas,
+    de forma responsiva (similar ao kanban).
+*/
+.lista-concluidas-visivel {
+    max-height: 600px;
+    transition: max-height 0.6s ease-in-out;
+    padding: 20px 0;
+    width: 85%;
+    max-width: 1300px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+}
+/* Classe que define a lista de concluídas como OCULTA.
+  - 'max-height: 0' e 'overflow: hidden' são a chave para a animação
+    de "deslizar para cima" (esconder).
+*/
+.lista-concluidas-oculta {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.6s ease-in-out;
+    padding: 0;
+    width: 85%;
+    margin: 0;
+}
+
+/* Estilo do texto de copyright no rodapé */
+.copyright {
+    margin-top: 15px;
+    font-size: 0.9em;
+    color: var(--cor-destaque-secundaria);
+}
+
+/* Estilo para o link no copyright
+*/
+.copyright a {
+    /* Define a cor do link para a cor do texto padrão (Marrom) */
+    color: var(--cor-destaque-secundaria); 
+    
+    /* Remove o sublinhado azul padrão */
+    text-decoration: none; 
+    
+    /* Deixa seu nome com um leve destaque */
+    font-weight: 600; 
+    
+    /* Adiciona uma transição suave para o efeito 'hover' */
+    transition: all 0.3s ease; 
+    
+    /* Efeito inicial: um sublinhado pontilhado na cor de destaque */
+    border-bottom: 1px dotted var(--cor-accent);
+}
+
+/* Efeito 'hover' (quando o mouse passa por cima) do link.
+  Este é o efeito que você pediu.
+*/
+.copyright a:hover {
+    /* Muda a cor do texto para o destaque principal (Terracota) */
+    color: var(--cor-destaque-principal); 
+    
+    /* Transforma o sublinhado pontilhado em uma linha sólida */
+    border-bottom-style: solid;
+}
+
+/* --- BLOCO 11: Animações (Keyframes) --- */
+
+/* Define a animação 'fadein':
+  - 'from' (início): O item está 100% transparente (opacity: 0) e
+    levemente deslocado para baixo (translateY(10px)).
+  - 'to' (fim): O item está 100% visível (opacity: 1) e na sua
+    posição original (translateY(0)).
+*/
+@keyframes fadein {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Keyframes da Animação do Cabeçalho:
+  Define os "passos" das animações complexas do cabeçalho.
+*/
+/* Animação de digitação (aumenta a largura e pisca o cursor) */
+@keyframes typing {
+    0% { width: 0; border-right-color: white; } 
+    20% { width: 100%; border-right-color: white; } 
+    25% { border-right-color: transparent; } 
+    100% { width: 100%; border-right-color: transparent; } 
+}
+/* Animação do cursor piscando */
+@keyframes blink-caret {
+    from, to { border-right-color: transparent }
+    50% { border-right-color: white }
+}
+/* Animação da primeira linha do X */
+@keyframes markX1 {
+    0%, 25% { width: 0; opacity: 0; } 
+    30% { width: 1.6em; opacity: 1; } 
+    40%, 100% { width: 1.6em; opacity: 1; } 
+}
+/* Animação da segunda linha do X */
+@keyframes markX2 {
+    0%, 35% { width: 0; opacity: 0; } 
+    40% { width: 1.6em; opacity: 1; } 
+    50%, 100% { width: 1.6em; opacity: 1; } 
+}
+/* Animação do texto sendo riscado */
+@keyframes strikeText {
+    0%, 50% { width: 0; opacity: 0; } 
+    55% { width: 0; opacity: 1; } 
+    75% { width: 100%; opacity: 1; } 
+    95% { width: 100%; opacity: 1; } 
+    100% { width: 0; opacity: 0; } 
+}
+/* Animação "mestra" que controla o tempo total (8 segundos) */
+@keyframes fullAnimation {
+    from, to {} 
+}
+
+/* --- BLOCO 12: Responsividade (Media Queries) --- */
+
+/* Inicia um bloco de regras de CSS que SÓ se aplicam se a tela
+  do navegador tiver 1024 pixels de largura ou MENOS (tablets).
+*/
+@media (max-width: 1024px) {
+    /* Limita a largura da seção de input em tablets */
+    .input-section {
+        max-width: 700px;
+    }
+    /* (Não precisamos mais de regras para o .kanban-container ou para
+      a largura dos inputs, pois eles já são fluidos graças ao
+      'flex-basis' e 'grid auto-fit'!)
+    */
+}
+
+/* Inicia um bloco de regras que SÓ se aplicam em telas
+  de 650px ou MENOS (celulares).
+*/
+@media (max-width: 650px) {
+    /* Reduz o espaçamento interno do <main> em celulares */
+    main {
+        padding: 20px 15px;
+    }
+    
+    /* Em celulares, força os formulários e filtros a ficarem
+      em coluna ('flex-direction: column') em vez de lado a lado.
+    */
+    .input-section, 
+    .controle-section,
+    .filtro-section {
+        flex-direction: column;
+        align-items: center;
+        gap: 15px; 
+    }
+    
+    /* Em celulares, faz todos os inputs e botões do formulário
+      ocuparem 100% da largura (com um máximo de 350px)
+      para melhor usabilidade e leitura.
+    */
+    #titulo-tarefa,
+    #descricao-tarefa,
+    #data-tarefa,
+    #horario-tarefa,
+    #prioridade-tarefa,
+    .input-section button,
+    #filtro-prioridade, 
+    .filtro-section button {
+        width: 100%; 
+        max-width: 350px; 
+        flex-basis: auto; /* Garante que a largura de 100% vença o flex-basis */
+    }
+    
+    /* Garante que os botões tenham a mesma altura dos inputs */
+    .input-section button, 
+    .filtro-section button {
+        height: 50px; 
+    }
+    
+    /* Em celulares, faz o painel de detalhes ocupar 100% da largura da tela */
+    .painel-visivel {
+        width: 100%; 
+    }
+    
+    /* Em celulares, força a lista de concluídas a ter apenas uma coluna */
+    .lista-concluidas-visivel {
+        width: 100%; 
+        grid-template-columns: 1fr;
+        padding: 20px 10px; 
+    }
+    
+    /* Diminui o tamanho da fonte do cabeçalho animado em celulares */
+    .header-animated {
+        font-size: 1.8em;
+        letter-spacing: 0.1em;
+    }
+}

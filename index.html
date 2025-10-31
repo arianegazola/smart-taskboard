@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To-Do List</title>
+
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.5.1/css/all.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header>
+        <div class="header-animated">
+            <div class="checkbox-container">
+                <span class="checkbox-x-line line1"></span>
+                <span class="checkbox-x-line line2"></span>
+            </div>
+            <div class="todo-text-container">
+                <span class="todo-text">To-Do List</span>
+                <span class="todo-text-overlay">To-Do List</span>
+                <span class="strikethrough-line"></span>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <section class="input-section">
+            <form class="form-tarefa" onsubmit="return false;">
+                
+                <label for="titulo-tarefa" class="sr-only">Título da tarefa</label>
+                <input type="text" id="titulo-tarefa" placeholder="Título da tarefa">
+
+                <label for="descricao-tarefa" class="sr-only">Descrição da tarefa</label>
+                <input type="text" id="descricao-tarefa" placeholder="Descrição da tarefa">
+
+                <label for="prioridade-tarefa" class="sr-only">Prioridade da tarefa</label>
+                <select id="prioridade-tarefa">
+                    <option value="baixa">Baixa prioridade</option>
+                    <option value="media">Média prioridade</option>
+                    <option value="alta">Alta prioridade</option>
+                </select>
+                
+                <label for="data-tarefa" class="sr-only">Data de conclusão</label>
+                <input type="date" id="data-tarefa" placeholder="Data"> 
+                
+                <label for="horario-tarefa" class="sr-only">Horário de conclusão</label>
+                <input type="time" id="horario-tarefa" placeholder="Horário">
+                
+                <button type="button" onclick="adicionarTarefa()" aria-label="Adicionar nova tarefa">
+                    <i class="fa-solid fa-plus"></i>
+                </button>
+            </form>
+        </section>
+        
+        <section class="controle-section">
+            <div class="filtro-section">
+                <label for="filtro-prioridade" class="sr-only">Filtrar por prioridade</label>
+                <select id="filtro-prioridade" onchange="atualizarListaUI()">
+                    <option value="todas">Todas as Prioridades</option>
+                    <option value="alta">Prioridade: Alta</option>
+                    <option value="media">Prioridade: Média</option>
+                    <option value="baixa">Prioridade: Baixa</option>
+                </select>
+                
+                <button onclick="limparFiltro()" title="Limpar Filtro" aria-label="Limpar filtro de prioridade">
+                    <i class="fa-solid fa-eraser"></i>
+                </button>
+            </div>
+            
+            <p id="contador-tarefas">0 tarefas pendentes</p>
+        </section>
+
+        <section class="kanban-container">
+            <div class="coluna-tarefa">
+                <h2>🔴 Atrasadas</h2>
+                <ul id="lista-atrasadas" class="lista-coluna">
+                    </ul>
+            </div>
+            
+            <div class="coluna-tarefa">
+                <h2>🎯 Para Hoje</h2>
+                <ul id="lista-hoje" class="lista-coluna">
+                    </ul>
+            </div>
+
+            <div class="coluna-tarefa">
+                <h2>⏰ Para Amanhã</h2>
+                <ul id="lista-amanha" class="lista-coluna">
+                    </ul>
+            </div>
+
+            <div class="coluna-tarefa">
+                <h2>🗓️ Futuras</h2>
+                <ul id="lista-futuras" class="lista-coluna">
+                    </ul>
+            </div>
+        </section>
+    </main>
+
+    <footer id="rodape-concluidas">
+        <div class="toggle-concluidas" onclick="toggleConcluidas()">
+            <p>✅ Tarefas Concluídas (<span id="contador-concluidas">0</span>)</p>
+            <i id="icone-toggle" class="fa-solid fa-chevron-up"></i>
+        </div>
+        
+        <ul id="lista-concluidas" class="lista-concluidas-oculta">
+            </ul>
+        
+        <p class="copyright">Projeto Desenvolvido por 
+        <a href="https://www.linkedin.com/in/arianegazola" target="_blank" rel="noopener noreferrer">Ariane Furlan Gazola</a> 
+        no Descomplica para Elas by VNT School & TIC em Trilhas (2025)
+    </p>
+    </footer>
+
+    <div id="painel-detalhes" class="painel-oculto">
+        <div class="painel-conteudo">
+            <button class="fechar-painel" onclick="fecharPainelDetalhes()" aria-label="Fechar painel de detalhes">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            
+            <label for="input-titulo-detalhes" class="sr-only">Editar título da tarefa</label>
+            <input type="text" id="input-titulo-detalhes" class="input-detalhes">
+            
+            <label for="input-descricao-detalhes" class="sr-only">Editar descrição da tarefa</label>
+            <textarea id="input-descricao-detalhes" class="input-detalhes"></textarea>
+            
+            <div class="detalhes-campos-data-hora">
+                <label for="input-data-detalhes" class="sr-only">Editar data de conclusão</label>
+                <input type="date" id="input-data-detalhes" class="input-detalhes">
+                
+                <label for="input-horario-detalhes" class="sr-only">Editar horário de conclusão</label>
+                <input type="time" id="input-horario-detalhes" class="input-detalhes">
+            </div>
+            
+            <h3>Mini Tarefas</h3>
+            <div class="subtarefas-input">
+                <label for="input-subtarefa-detalhes" class="sr-only">Adicionar nova mini tarefa</label>
+                <input type="text" id="input-subtarefa-detalhes" placeholder="Adicionar nova mini tarefa">
+                
+                <button onclick="adicionarSubtarefaDoPainel()" aria-label="Adicionar mini tarefa">+</button>
+            </div>
+            <ul id="lista-subtarefas-detalhes">
+                </ul>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
