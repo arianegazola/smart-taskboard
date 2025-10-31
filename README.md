@@ -9,6 +9,19 @@ O projeto foi desenvolvido como parte do meu processo de aprendizado em **lógic
 
 ---
 
+## 🖼️ Interface do Projeto  
+
+### Painel Principal  
+![Painel Principal](./3b6e11b9-6571-4702-8906-bf61f6200ef8.png)
+
+### Seletor de Prioridades em Funcionamento  
+![Seletor de Prioridades em Funcionamento](./e9eea356-2576-44e6-9585-013214e633d3.png)
+
+### Rodapé e Tarefas Concluídas  
+![Rodapé e Tarefas Concluídas](./1705fb76-f686-4c55-87ae-0c56c0537663.png)
+
+---
+
 ## 🚀 Funcionalidades Principais  
 
 ✅ **Organização Automática no Kanban**  
